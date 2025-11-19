@@ -66,6 +66,9 @@ int numC = 0;
 int numN = 0;
 int numM = 0;
 
+void salva_dados();
+void recupera_dados();
+
 void menu_crud();
 void menu_inclusao();
 void menu_alterar();
@@ -89,6 +92,8 @@ void excluir_cla(int clas);
 void excluir_ninja_missao(int ninja_missao);
 void excluir_ninja(int ninjago);
 
+void excluir_missao(int ex_missao);
+
 void verifica_opcao(int op);
 void verifica_inclusao(int opcao);
 void verifica_alterar(int opcao);
@@ -109,6 +114,7 @@ int verifica_sim_nao(char straux[10]);
 void verifica_alterar(int alternar);
 int verifica_jutsu_em_lugar(int jutsu_lugar);
 void verifica_excluir(int op);
+void verifica_listar(int op);
 
 void inclusao_jutsu();
 void inclusao_cla();
@@ -146,11 +152,17 @@ void imprime_jutsu();
 void imprime_cla();
 void imprime_hierarquia();
 
+void op_listar_jutsu(int opcao);
+void op_listar_cla(int opcao);
+void op_listar_ninja(int opcao);
+void op_listar_missao(int opcao);
+
 int ler_intervalo(int min, int max);
 
 int main()
 {
     int opcao = 1;
+    recupera_dados();
     system("clear");
     while (opcao != 5)
     {
@@ -159,6 +171,7 @@ int main()
         system("clear");
         verifica_opcao(opcao);
     }
+    salva_dados();
     return 0;
 }
 
@@ -326,6 +339,16 @@ void verifica_opcao(int op)
             opcao = ler_intervalo(1, 5);
             system("clear");
             verifica_excluir(opcao);
+        }
+    }
+    else if (op == 4)
+    {
+        while(opcao != 5)
+        {
+            menu_listar();
+            opcao = ler_intervalo(1, 5);
+            system("clear");
+            verifica_listar(opcao);
         }
     }
 }
@@ -655,58 +678,122 @@ void verifica_excluir(int op)
     char straux[10];
     if (op == 1)
     {
-        printf("--- JUTSUS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
-        printf("   [0] - Para voltar\n");
-        escolha_jutsu();
-        opcao = ler_intervalo(1, numJ);
-        printf("   SE O JUTSU ESTIVER PRESENTE EM CLA OU NINJA ELE SERA EXCLUIDO EM AMBOS OS LUGARES!\n");
-        printf("   Deseja prosseguir? (s/n):");
-        fgets(straux, sizeof(straux), stdin);
-        erro = verifica_sim_nao(straux);
-        if (erro == 0)
+        if (numJ == 0)
         {
-            excluir_jutsu_cla(opcao - 1);
-            excluir_jutsu_ninja(opcao - 1);
-            excluir_jutsu(opcao - 1);
-            system("clear");
-            printf("   Exclusão do jutsu feita com sucesso!\n");
+            printf("   Nenhum jutsu cadastrado para excluir!\n");
             PAUSE();
+        }
+        else
+        {
+            printf("--- JUTSUS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+            printf("   [0] - Para voltar\n");
+            escolha_jutsu();
+            opcao = ler_intervalo(0, numJ);
+            if (opcao != 0)
+            {
+                printf("   SE O JUTSU ESTIVER PRESENTE EM CLA OU NINJA ELE SERA EXCLUIDO EM AMBOS OS LUGARES!\n");
+                printf("   Deseja prosseguir? (s/n):");
+                fgets(straux, sizeof(straux), stdin);
+                erro = verifica_sim_nao(straux);
+                if (erro == 0)
+                {
+                    excluir_jutsu_cla(opcao - 1);
+                    excluir_jutsu_ninja(opcao - 1);
+                    excluir_jutsu(opcao - 1);
+                    system("clear");
+                    printf("   Exclusão do jutsu feita com sucesso!\n");
+                    PAUSE();
+                }
+            }
         }
     }
     else if (op == 2)
     {
-        printf("--- CLAS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
-        escolha_cla();
-        opcao = ler_intervalo(1, numC);
-        printf("   SE CLA ESTIVER PRESENTE EM ALGUM NINJA, O CLA SERA DADO COMO MORTO!\n");
-        printf("   Deseja prosseguir? (s/n):");
-        fgets(straux, sizeof(straux), stdin);
-        erro = verifica_sim_nao(straux);
-        if (erro == 0)
+        if (numC == 0)
         {
-            excluir_cla_ninja(opcao - 1);
-            excluir_cla(opcao - 1);
-            system("clear");
-            printf("   Exclusão do cla feita com sucesso!");
+            printf("   Nenhum clã cadastrado para excluir!\n");
             PAUSE();
+        }
+        else
+        {
+            printf("--- CLÃS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+            printf("   [0] - Para voltar\n");
+            escolha_cla();
+            opcao = ler_intervalo(0, numC);
+            if (opcao != 0)
+            {
+                printf("   SE O CLÃ ESTIVER PRESENTE EM NINJA ELE SERA EXCLUIDO LÁ TAMBÉM!\n");
+                printf("   Deseja prosseguir? (s/n):");
+                fgets(straux, sizeof(straux), stdin);
+                erro = verifica_sim_nao(straux);
+                if (erro == 0)
+                {
+                    excluir_cla_ninja(opcao - 1);
+                    excluir_cla(opcao - 1);
+                    system("clear");
+                    printf("   Exclusão do clã feita com sucesso!\n");
+                    PAUSE();
+                }
+            }
         }
     }
     else if (op == 3)
     {
-        printf("--- NINJAS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
-        escolha_ninja();
-        opcao = ler_intervalo(1, numN);
-        printf("   SE O NINJA FOR O LIDER DE UMA MISSAO ELE SERA DADO COMO MORTO, O MESMO PARA O NINJA");
-        printf("   Deseja prosseguir? (s/n):");
-        fgets(straux, sizeof(straux), stdin);
-        erro = verifica_sim_nao(straux);
-        if (erro == 0)
+        if (numN == 0)
         {
-            excluir_ninja_missao(opcao - 1);
-            excluir_ninja(opcao - 1);
-            system("clear");
-            printf("   Exclusao do ninja feita com sucesso!");
+            printf("   Nenhum ninja cadastrado para excluir!\n");
             PAUSE();
+        }
+        else
+        {
+            printf("--- NINJAS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+            printf("   [0] - Para voltar\n");
+            escolha_ninja();
+            opcao = ler_intervalo(0, numN);
+            if (opcao != 0)
+            {
+                printf("   SE O NINJA ESTIVER PRESENTE EM MISSÃO ELE SERA EXCLUIDO LÁ TAMBÉM!\n");
+                printf("   Deseja prosseguir? (s/n):");
+                fgets(straux, sizeof(straux), stdin);
+                erro = verifica_sim_nao(straux);
+                if (erro == 0)
+                {
+                    excluir_ninja_missao(opcao - 1);
+                    excluir_ninja(opcao - 1);
+                    system("clear");
+                    printf("   Exclusão do ninja feita com sucesso!\n");
+                    PAUSE();
+                }
+            }
+        }
+    }
+    else if (op == 4)
+    {
+        if (numM == 0)
+        {
+            printf("   Nenhuma missão cadastrada para excluir!\n");
+            PAUSE();
+        }
+        else
+        {
+            printf("--- MISSÕES DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+            printf("   [0] - Para voltar\n");
+            escolha_missao();
+            opcao = ler_intervalo(0, numM);
+            if (opcao != 0)
+            {
+                printf("   REALMENTE DESEJA EXCLUIR ESTA MISSÃO? TODOS OS DADOS DELA SERÃO PERDIDOS!\n");
+                printf("   Deseja prosseguir? (s/n):");
+                fgets(straux, sizeof(straux), stdin);
+                erro = verifica_sim_nao(straux);
+                if (erro == 0)
+                {
+                    excluir_missao(opcao - 1);
+                    system("clear");
+                    printf("   Exclusão da missão feita com sucesso!\n");
+                    PAUSE();
+                }
+            }
         }
     }
 }
@@ -1862,24 +1949,44 @@ int verifica_ninja_missao(int ninja)
 {
     int i, j;
     
-    for (i = 0; i < numM; i++)
+    if (numM == 0)
     {
-        if (i != numM)
+        if (missao[numM].lider == ninja)
         {
-            if (missao[i].lider == ninja)
+            return -1;
+        }
+        else
+        {
+            for (i = 0; i < missao[numM].qtd_ninjas; i++)
             {
-                if (strcmp(missao[i].status, "Pendente") == 0 || strcmp(missao[i].status, "Em andamento") == 0)
+                if (missao[numM].ninjas_participando[i] == ninja)
                 {
                     return -1;
                 }
             }
-            for (j = 0; j < missao[i].qtd_ninjas; j++)
+        }
+    }
+    else
+    {
+        for (i = 0; i < numM; i++)
+        {
+            if (i != numM)
             {
-                if (missao[i].ninjas_participando[j] == ninja)
+                if (missao[i].lider == ninja)
                 {
                     if (strcmp(missao[i].status, "Pendente") == 0 || strcmp(missao[i].status, "Em andamento") == 0)
                     {
                         return -1;
+                    }
+                }
+                for (j = 0; j < missao[i].qtd_ninjas; j++)
+                {
+                    if (missao[i].ninjas_participando[j] == ninja)
+                    {
+                        if (strcmp(missao[i].status, "Pendente") == 0 || strcmp(missao[i].status, "Em andamento") == 0)
+                        {
+                            return -1;
+                        }
                     }
                 }
             }
@@ -2340,18 +2447,29 @@ void alterar(int altera, int indice, int caso)
     case 3:
     if (caso == 1)
     {
-        printf("   Digite o novo nome do ninja %s:", ninja[indice - 1].nome_ninja);
-        fgets(straux, sizeof(straux), stdin);
-        config_string(straux);
-        
-        
-        free(ninja[indice - 1].nome_ninja);
-        ninja[indice - 1].nome_ninja = (char*) malloc((strlen(straux) + 1) * sizeof(char));
-        strcpy(ninja[indice - 1].nome_ninja, straux);
-        
-        system("clear");
-        printf("   Nome do ninja alterado com sucesso!");
-        PAUSE();
+        erro = -1;
+        while (erro == -1)
+        {
+            printf("   Digite o novo nome do ninja %s:", ninja[indice - 1].nome_ninja);
+            fgets(straux, sizeof(straux), stdin);
+            config_string(straux);
+            erro = verifica_nome_ninja(straux);
+            if (erro == 0)
+            {
+                free(ninja[indice - 1].nome_ninja);
+                ninja[indice - 1].nome_ninja = (char*) malloc((strlen(straux) + 1) * sizeof(char));
+                strcpy(ninja[indice - 1].nome_ninja, straux);
+                
+                system("clear");
+                printf("   Nome do ninja alterado com sucesso!");
+                PAUSE();
+            }
+            else
+            {
+                mensagem_erro(-9);
+                PAUSE();
+            }
+        }
     }
     else if (caso == 2)
     {
@@ -2946,51 +3064,19 @@ void alterar_jutsu_de_cla(int indice, int op)
         {
             erro = 0;
             printf("   Qual dos jutsus abaixo deseja para substituir o jutsu %s do cla?:", jutsu[cla[indice - 1].jutsus_cla[aux - 1]].nome_jutsu);
+            printf("   [0] - Para cadastrar um novo jutsu\n");
             escolha_jutsu();
-            aux2 = ler_intervalo(1, numJ);
-            for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
+            aux2 = ler_intervalo(0, numJ);
+            if (aux2 == 0)
             {
-                if (aux2 - 1 == cla[indice - 1].jutsus_cla[i])
-                {
-                    erro = -1;
-                    system("clear");
-                    mensagem_erro(-10);
-                    PAUSE();
-                    break;
-                }
-            }
-            if (erro == 0)
-            {
-                erro = jutsu_de_cla(aux2 - 1, indice - 1);
-                if (erro == 0)
-                {
-                    cla[indice - 1].jutsus_cla[aux - 1] = aux2 - 1;
-                    printf("   Jutsu alterado com sucesso!\n");
-                    PAUSE();
-                    break;
-                }
+                system("clear");
+                inclusao_jutsu();
             }
             else
             {
-                system("clear");
-                mensagem_erro(-8);
-                PAUSE();
-            }
-        }
-    }
-    else if (op == 2)
-    {
-        for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
-        {
-            erro = -1;
-            while(erro == -1)
-            {
-                printf("--- Jutsu disponiveis abaixo para alterar o jutsu [%d] - %s do cla %s ---", i + 1, jutsu[cla[indice - 1].jutsus_cla[i]].nome_jutsu);
-                escolha_jutsu();
-                aux = ler_intervalo(1, numJ);
-                for (aux2 = 0; aux2 < cla[indice - 1].qtd_jutsus; aux2++)
+                for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
                 {
-                    if (aux - 1 == cla[indice - 1].jutsus_cla[aux2])
+                    if (aux2 - 1 == cla[indice - 1].jutsus_cla[i])
                     {
                         erro = -1;
                         system("clear");
@@ -3001,10 +3087,10 @@ void alterar_jutsu_de_cla(int indice, int op)
                 }
                 if (erro == 0)
                 {
-                    erro = jutsu_de_cla(aux - 1, indice - 1);
+                    erro = jutsu_de_cla(aux2 - 1, indice - 1);
                     if (erro == 0)
                     {
-                        cla[indice - 1].jutsus_cla[i] = aux - 1;
+                        cla[indice - 1].jutsus_cla[aux - 1] = aux2 - 1;
                         printf("   Jutsu alterado com sucesso!\n");
                         PAUSE();
                         break;
@@ -3019,6 +3105,56 @@ void alterar_jutsu_de_cla(int indice, int op)
             }
         }
     }
+    else if (op == 2)
+    {
+        for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
+        {
+            erro = -1;
+            while(erro == -1)
+            {
+                printf("--- Jutsu disponiveis abaixo para alterar o jutsu [%d] - %s do cla %s ---", i + 1, jutsu[cla[indice - 1].jutsus_cla[i]].nome_jutsu, cla[indice - 1].nome_cla);
+                printf("   [0] - Para cadastrar um novo jutsu\n");
+                escolha_jutsu();
+                aux = ler_intervalo(0, numJ);
+                if (aux == 0)
+                {
+                    system("clear");
+                    inclusao_jutsu();
+                }
+                else
+                {
+                    for (int g = 0; g < cla[indice - 1].qtd_jutsus; g++)
+                    {
+                        if (aux - 1 == cla[indice - 1].jutsus_cla[g])
+                        {
+                            erro = -1;
+                            system("clear");
+                            mensagem_erro(-10);
+                            PAUSE();
+                            break;
+                        }
+                    }
+                    if (erro == 0)
+                    {
+                        erro = jutsu_de_cla(aux - 1, indice - 1);
+                        if (erro == 0)
+                        {
+                            cla[indice - 1].jutsus_cla[i] = aux - 1;
+                            printf("   Jutsu alterado com sucesso!\n");
+                            PAUSE();
+                            break;
+                        }
+                        else
+                        {
+                            system("clear");
+                            mensagem_erro(-8);
+                            PAUSE();
+                        }
+                    }
+                }
+            }
+        }
+    }
     else if (op == 3)
     {
         erro = -1;
@@ -3027,50 +3163,22 @@ void alterar_jutsu_de_cla(int indice, int op)
             if (cla[indice - 1].qtd_jutsus == 0)
             {
                 printf("----- JUTSUS ABAIXO PARA ADICIONAR NO CLA -----");
+                printf("   [0] - Para cadastrar um novo jutsu\n");
                 escolha_jutsu();
-                aux = ler_intervalo(1, numJ);
-                erro = jutsu_de_cla(aux - 1, indice - 1);
-                if (erro == 0)
-                {
-                    cla[indice - 1].jutsus_cla = (int*) malloc(sizeof(int));
-                    cla[indice - 1].jutsus_cla[cla[indice - 1].qtd_jutsus] = aux - 1;
-                    cla[indice - 1].qtd_jutsus++;
-                    printf("   Jutsu adicionado com sucesso!\n");
-                    PAUSE();
-                    break;
-                }
-                else
+                aux = ler_intervalo(0, numJ);
+                if (aux == 0)
                 {
                     system("clear");
-                    mensagem_erro(-8);
-                    PAUSE();
+                    inclusao_jutsu();
                 }
-            }
-            else
-            {
-                printf("----- JUTSUS ABAIXO PARA ADICIONAR NO CLA -----");
-                escolha_jutsu();
-                aux = ler_intervalo(1, numJ);
-                for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
-                {
-                    if (aux - 1 == cla[indice - 1].jutsus_cla[i])
-                    {
-                        system("clear");
-                        mensagem_erro(-10);
-                        PAUSE();
-                        erro = -1;
-                        break;
-                    }
-                    erro = 0;
-                }
-                if (erro == 0)
+                else
                 {
                     erro = jutsu_de_cla(aux - 1, indice - 1);
                     if (erro == 0)
                     {
-                        cla[indice - 1].jutsus_cla = (int*) realloc(cla[indice - 1].jutsus_cla, (cla[indice - 1].qtd_jutsus + 1) * sizeof(int));
-                        cla[indice - 1].jutsus_cla[cla[indice - 1].qtd_jutsus] = aux - 1;
-                        cla[indice - 1].qtd_jutsus++;
+                        cla[indice - 1].jutsus_cla = (int*) malloc(sizeof(int));
+                        cla[indice - 1].jutsus_cla[0] = aux - 1;
+                        cla[indice - 1].qtd_jutsus = 1;
                         printf("   Jutsu adicionado com sucesso!\n");
                         PAUSE();
                         break;
@@ -3082,66 +3190,125 @@ void alterar_jutsu_de_cla(int indice, int op)
                         PAUSE();
                     }
                 }
+                
+            }
+            else
+            {
+                printf("----- JUTSUS ABAIXO PARA ADICIONAR NO CLA -----");
+                printf("   [0] - Para cadastrar um novo jutsu\n");
+                escolha_jutsu();
+                aux = ler_intervalo(0,numJ);
+                if (aux == 0)
+                {
+                    system("clear");
+                    inclusao_jutsu();
+                }
+                else
+                {
+                    for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
+                    {
+                        if (aux - 1 == cla[indice - 1].jutsus_cla[i])
+                        {
+                            erro = -1;
+                            system("clear");
+                            mensagem_erro(-10);
+                            PAUSE();
+                            break;
+                        }
+                    }
+                    if (erro == 0)
+                    {
+                        erro = jutsu_de_cla(aux - 1, indice - 1);
+                        if (erro == 0)
+                        {
+                            cla[indice - 1].qtd_jutsus++;
+                            cla[indice - 1].jutsus_cla = (int*) realloc(cla[indice - 1].jutsus_cla, cla[indice - 1].qtd_jutsus * sizeof(int));
+                            cla[indice - 1].jutsus_cla[cla[indice - 1].qtd_jutsus - 1] = aux - 1;
+                            printf("   Jutsu adicionado com sucesso!\n");
+                            PAUSE();
+                            break;
+                        }
+                        else
+                        {
+                            system("clear");
+                            mensagem_erro(-8);
+                            PAUSE();
+                        }
+                    }
+                }
             }
         }
     }
     else if (op == 4)
     {
-        printf("----- ESCOLHA O JUTSU QUE DESEJA EXCLUIR NO CLA -----\n");
-        for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
+        if (cla[indice - 1].qtd_jutsus == 0)
         {
-            printf("   [%d] - %s\n", i + 1, jutsu[cla[indice - 1].jutsus_cla[i]].nome_jutsu);
-        }
-        printf("   Digite uma opção:");
-        aux = ler_intervalo(1, cla[indice - 1].qtd_jutsus);
-        if (aux == cla[indice - 1].qtd_jutsus)
-        {
-            cla[indice - 1].qtd_jutsus--;
-            if (cla[indice - 1].qtd_jutsus > 0)
-            {
-                cla[indice - 1].jutsus_cla = (int*) realloc(cla[indice - 1].jutsus_cla, cla[indice - 1].qtd_jutsus * sizeof(int));
-            }
-            else
-            {
-                free(cla[indice - 1].jutsus_cla);
-                cla[indice - 1].jutsus_cla = NULL;
-            }
-            system("clear");
-            printf("   Exclusão feita com sucesso!");
+            printf("   Não há jutsus cadastrados no cla %s para excluir!", cla[indice - 1].nome_cla);
             PAUSE();
+            return;
         }
         else
         {
-            for (i = aux - 1; i < cla[indice - 1].qtd_jutsus - 1; i++)
+            printf("----- ESCOLHA O JUTSU QUE DESEJA EXCLUIR NO CLA -----\n");
+            for (i = 0; i < cla[indice - 1].qtd_jutsus; i++)
             {
-                cla[indice - 1].jutsus_cla[i] = cla[indice - 1].jutsus_cla[i + 1];
+                printf("   [%d] - %s\n", i + 1, jutsu[cla[indice - 1].jutsus_cla[i]].nome_jutsu);
             }
-            cla[indice - 1].qtd_jutsus--;
-            if (cla[indice - 1].qtd_jutsus > 0)
+            printf("   Digite uma opção:");
+            aux = ler_intervalo(1, cla[indice - 1].qtd_jutsus);
+            if (aux == cla[indice - 1].qtd_jutsus)
             {
-                cla[indice - 1].jutsus_cla = (int*) realloc(cla[indice - 1].jutsus_cla, cla[indice - 1].qtd_jutsus * sizeof(int));
-            }
-            else
-            {
-                free(cla[indice - 1].jutsus_cla);
-                cla[indice - 1].jutsus_cla = NULL;
-            }
+                cla[indice - 1].qtd_jutsus--;
+                if (cla[indice - 1].qtd_jutsus > 0)
+                {
+                    cla[indice - 1].jutsus_cla = (int*) realloc(cla[indice - 1].jutsus_cla, cla[indice - 1].qtd_jutsus * sizeof(int));
+                }
+                else
+                {
+                    free(cla[indice - 1].jutsus_cla);
+                    cla[indice - 1].jutsus_cla = NULL;
+                }
             system("clear");
             printf("   Exclusão feita com sucesso!");
             PAUSE();
+            }
+            else
+            {
+                for (i = aux - 1; i < cla[indice - 1].qtd_jutsus - 1; i++)
+                {
+                    cla[indice - 1].jutsus_cla[i] = cla[indice - 1].jutsus_cla[i + 1];
+                }
+                cla[indice - 1].qtd_jutsus--;
+                if (cla[indice - 1].qtd_jutsus > 0)
+                {
+                    cla[indice - 1].jutsus_cla = (int*) realloc(cla[indice - 1].jutsus_cla, cla[indice - 1].qtd_jutsus * sizeof(int));
+                }
+                else
+                {
+                    free(cla[indice - 1].jutsus_cla);
+                    cla[indice - 1].jutsus_cla = NULL;
+                }
+                system("clear");
+                printf("   Exclusão feita com sucesso!");
+                PAUSE();
+            }
         }
     }
     else if (op == 5)
     {
-        printf("   Deseja realmente excluir todos os jutsus do cla? (s/n):");
-        fgets(straux, sizeof(straux), stdin);
-        erro = verifica_sim_nao(straux);
-        if (erro == 0)
+        if (cla[indice - 1].qtd_jutsus == 0)
+        {
+            printf("   Não há jutsus cadastrados no cla %s para excluir!", cla[indice - 1].nome_cla);
+            PAUSE();
+            return;
+        }
+        else
         {
             free(cla[indice - 1].jutsus_cla);
             cla[indice - 1].jutsus_cla = NULL;
             cla[indice - 1].qtd_jutsus = 0;
-            printf("   Exclusão dos jutsus feita com sucesso!");
+            system("clear");
+            printf("   Exclusão de todos os jutsus do cla %s feita com sucesso!", cla[indice - 1].nome_cla);
             PAUSE();
         }
     }
@@ -3155,40 +3322,49 @@ void alterar_jutsu_de_ninja(int op, int indice)
     {
         while(erro == -1)
         {
-            printf("--- JUTSUS DO NINJA ABAIXO DISPONIVEIS PARA ALTERAR ---\n");
-            for(i = 0; i < ninja[indice - 1].qtd_jutsus; i++)
+            if (ninja[indice - 1].qtd_jutsus == 0)
             {
-                printf(" [%d] - %s\n", i + 1, jutsu[ninja[indice - 1].jutsus_ninja[i]].nome_jutsu); 
-            }
-            aux = ler_intervalo(1, ninja[indice - 1].qtd_jutsus);
-            system("clear");
-            printf("--- ESCOLHA UM JUTSU PARA SUBSTITUIR O JUTSU %s DO NINJA ---\n", jutsu[ninja[indice - 1].jutsus_ninja[aux - 1]].nome_jutsu);
-            escolha_jutsu();
-            aux2 = ler_intervalo(1, numJ);
-            erro = verifica_anterior(aux2 - 1, indice - 1);
-            if (erro == 0)
-            {
-                ninja[indice - 1].jutsus_ninja[aux - 1] = aux2 - 1;
-                printf("   Jutsu alterado com sucesso!");
+                printf("   Não há jutsus cadastrados no ninja %s para alterar!", ninja[indice - 1].nome_ninja);
                 PAUSE();
-                break;
+                return;
             }
             else
             {
-                mensagem_erro(-15);
-                PAUSE();
-                
-                printf("   Deseja cadastrar um jutsu e ser redirecionado devolta para substituir o jutsu que deseja pelo cadastrado? (s/n)");
-                fgets(straux, sizeof(straux), stdin);
-                erro = verifica_sim_nao(straux);
+                printf("--- JUTSUS DO NINJA ABAIXO DISPONIVEIS PARA ALTERAR ---\n");
+                for(i = 0; i < ninja[indice - 1].qtd_jutsus; i++)
+                {
+                    printf(" [%d] - %s\n", i + 1, jutsu[ninja[indice - 1].jutsus_ninja[i]].nome_jutsu); 
+                }
+                aux = ler_intervalo(1, ninja[indice - 1].qtd_jutsus);
+                system("clear");
+                printf("--- ESCOLHA UM JUTSU PARA SUBSTITUIR O JUTSU %s DO NINJA ---\n", jutsu[ninja[indice - 1].jutsus_ninja[aux - 1]].nome_jutsu);
+                escolha_jutsu();
+                aux2 = ler_intervalo(1, numJ);
+                erro = verifica_anterior(aux2 - 1, indice - 1);
                 if (erro == 0)
                 {
-                    system("clear");
-                    inclusao_jutsu();
+                    ninja[indice - 1].jutsus_ninja[aux - 1] = aux2 - 1;
+                    printf("   Jutsu alterado com sucesso!");
+                    PAUSE();
+                    break;
                 }
-                else if (erro == 1)
+                else
                 {
-                    erro = -1;
+                    mensagem_erro(-15);
+                    PAUSE();
+                
+                    printf("   Deseja cadastrar um jutsu e ser redirecionado devolta para substituir o jutsu que deseja pelo cadastrado? (s/n)");
+                    fgets(straux, sizeof(straux), stdin);
+                    erro = verifica_sim_nao(straux);
+                    if (erro == 0)
+                    {
+                        system("clear");
+                        inclusao_jutsu();
+                    }
+                    else if (erro == 1)
+                    {
+                        erro = -1;
+                    }
                 }
             }
         }
@@ -3200,28 +3376,43 @@ void alterar_jutsu_de_ninja(int op, int indice)
        {
             printf("--- ESCOLHA UM JUTSU PARA ADICIONAR AO NINJA ---\n");
             escolha_jutsu();
-            aux = ler_intervalo(1, numJ);
-            erro = verifica_anterior(aux - 1, indice - 1);
-            if (erro == 0)
+            aux = ler_intervalo(0, numJ);
+            if (aux == 0)
             {
-                if (ninja[indice - 1].qtd_jutsus == 0)
-                {
-                    ninja[indice - 1].jutsus_ninja = (int*) malloc(sizeof(int));
-                }
-                else
-                {
-                    ninja[indice - 1].jutsus_ninja = (int*) realloc(ninja[indice - 1].jutsus_ninja, (ninja[indice - 1].qtd_jutsus + 1) * sizeof(int));
-                }
-                ninja[indice - 1].jutsus_ninja[ninja[indice - 1].qtd_jutsus] = aux - 1;
-                ninja[indice - 1].qtd_jutsus++;
-                printf("   Jutsu adicionado com sucesso!");
-                PAUSE();
-                break;
+                system("clear");
+                inclusao_jutsu();
             }
             else
             {
-                mensagem_erro(-15);
-                PAUSE();
+                erro = verifica_anterior(aux - 1, indice - 1);
+                if (erro == 0)
+                {
+                    ninja[indice - 1].qtd_jutsus++;
+                    ninja[indice - 1].jutsus_ninja = (int*) realloc(ninja[indice - 1].jutsus_ninja, ninja[indice - 1].qtd_jutsus * sizeof(int));
+                    ninja[indice - 1].jutsus_ninja[ninja[indice - 1].qtd_jutsus - 1] = aux - 1;
+                    system("clear");
+                    printf("   Jutsu adicionado com sucesso!");
+                    PAUSE();
+                    erro = 0;
+                }
+                else
+                {
+                    mensagem_erro(-15);
+                    PAUSE();
+                
+                    printf("   Deseja cadastrar um jutsu e ser redirecionado devolta para adicionar o jutsu que deseja pelo cadastrado? (s/n)");
+                    fgets(straux, sizeof(straux), stdin);
+                    erro = verifica_sim_nao(straux);
+                    if (erro == 0)
+                    {
+                        system("clear");
+                        inclusao_jutsu();
+                    }
+                    else if (erro == 1)
+                    {
+                        erro = -1;
+                    }
+                }
             }
        }
     }
@@ -3465,3 +3656,309 @@ void excluir_ninja(int ninjago)
         numN = 0;
     }
 }
+
+void excluir_missao(int ex_missao)
+{
+    int i;
+    free(missao[ex_missao].titulo);
+    free(missao[ex_missao].status);
+    
+    free(missao[ex_missao].ninjas_participando);
+    
+    for (i = ex_missao; i < numM - 1; i++)
+    {
+        missao[i] = missao[i + 1];
+    }
+    numM--;
+    if (numM > 0)
+    {
+        missao = (TMissao*) realloc(missao, numM * sizeof(TMissao));
+    }
+    else
+    {
+        free(missao);
+        missao = NULL;
+        numM = 0;
+    }
+}
+void verifica_listar(int op)
+{
+    int opcao = 1;
+    if (op == 1)
+    {
+        if (numJ == 0)
+        {
+            printf("   Não há jutsus cadastrados no sistema.\n");
+        }
+        else
+        {
+            printf("\n=========================================\n");
+            printf("          MENU DE LISTAGEM DE JUTSUS            ");
+            printf("\n=========================================\n\n");
+            printf("   [1] - Listar um jutsu específico\n");
+            printf("   [2] - Listar todos os jutsus\n");
+            printf("-----------------------------------------\n");
+            printf("   Digite uma opção: ");
+            opcao = ler_intervalo(1, 2);
+            op_listar_jutsu(opcao);
+        }
+    }
+    else if (op == 2)
+    {
+        if (numC == 0)
+        {
+            printf("   Não há clãs cadastrados no sistema.\n");
+        }
+        else
+        {
+            printf("\n=========================================\n");
+            printf("          MENU DE LISTAGEM DE CLÃS            ");
+            printf("\n=========================================\n\n");
+            printf("   [1] - Listar um clã específico\n");
+            printf("   [2] - Listar todos os clãs\n");
+            printf("-----------------------------------------\n");
+            printf("   Digite uma opção: ");
+            opcao = ler_intervalo(1, 2);
+            op_listar_cla(opcao);
+        }
+    }
+    else if (op == 3)
+    {
+        if (numN == 0)
+        {
+            printf("   Não há ninjas cadastrados no sistema.\n");
+        }
+        else
+        {
+            printf("\n=========================================\n");
+            printf("          MENU DE LISTAGEM DE NINJAS            ");
+            printf("\n=========================================\n\n");
+            printf("   [1] - Listar um ninja específico\n");
+            printf("   [2] - Listar todos os ninjas\n");
+            printf("-----------------------------------------\n");
+            printf("   Digite uma opção: ");
+            opcao = ler_intervalo(1, 2);
+            op_listar_ninja(opcao);
+        }
+    }
+    else if (op == 4)
+    {
+        if (numM == 0)
+        {
+            printf("   Não há missões cadastradas no sistema.\n");
+        }
+        else
+        {
+            printf("\n=========================================\n");
+            printf("          MENU DE LISTAGEM DE MISSÕES            ");
+            printf("\n=========================================\n\n");
+            printf("   [1] - Listar uma missão específica\n");
+            printf("   [2] - Listar todas as missões\n");
+            printf("-----------------------------------------\n");
+            printf("   Digite uma opção: ");
+            opcao = ler_intervalo(1, 2);
+            op_listar_missao(opcao);
+        }
+    }
+}
+void op_listar_jutsu(int opcao)
+{
+    int indice, i, g;
+    if (opcao == 1)
+    {
+        escolha_jutsu();
+        indice = ler_intervalo(1, numJ);
+        system("clear");
+        printf("   --- DADOS DO JUTSU %s ---\n", jutsu[indice - 1].nome_jutsu);
+        printf("   Nome: %s\n", jutsu[indice - 1].nome_jutsu);
+        printf("   Tipo: %s\n", jutsu[indice - 1].tipo_jutsu);
+        printf("   Elementos:\n");
+        for (int i = 0; i < jutsu[indice - 1].numE; i++)
+        {
+            printf("     - %s\n", jutsu[indice - 1].elemento_jutsu[i]);
+        }
+        printf("   --- ATRIBUTOS DO JUTSU ---\n");
+        printf("   Custo de Chakra: %d\n", jutsu[indice - 1].custo_chakra);
+        printf("   Nivel de poder: %d\n", jutsu[indice - 1].poder_chakra);
+        PAUSE();
+    }
+    else
+    {
+        for (i = 0; i < numJ; i++)
+        {
+            system("clear");
+            printf("   --- DADOS DO JUTSU %s ---\n", jutsu[i].nome_jutsu);
+            printf("   Nome: %s\n", jutsu[i].nome_jutsu);
+            printf("   Tipo: %s\n", jutsu[i].tipo_jutsu);
+            printf("   Elementos:\n");
+            for (g = 0; g < jutsu[i].numE; g++)
+            {
+                printf("     - %s\n", jutsu[i].elemento_jutsu[g]);
+            }
+            printf("   --- ATRIBUTOS DO JUTSU ---\n");
+            printf("   Custo de Chakra: %d\n", jutsu[i].custo_chakra);
+            printf("   Nivel de poder: %d\n", jutsu[i].poder_chakra);
+            PAUSE();
+        }
+    }
+}
+void op_listar_cla(int opcao)
+{
+    int indice, i, g;
+    if (opcao == 1)
+    {
+        escolha_cla();
+        indice = ler_intervalo(1, numC);
+        system("clear");
+        printf("   --- DADOS DO CLÃ %s ---\n", cla[indice - 1].nome_cla);
+        printf("   Nome: %s\n", cla[indice - 1].nome_cla);
+        printf("   Kekkei Genkai: %s\n", cla[indice - 1].kekkei_genkai);
+        printf("   Jutsus do Clã:\n");
+        for (g = 0; g < cla[indice - 1].qtd_jutsus; g++)
+        {
+            printf("     - %s\n", jutsu[cla[indice - 1].jutsus_cla[g]].nome_jutsu);
+        }
+        PAUSE();
+    }
+    else
+    {
+        for (i = 0; i < numC; i++)
+        {
+            system("clear");
+            printf("   --- DADOS DO CLÃ %s ---\n", cla[i].nome_cla);
+            printf("   Nome: %s\n", cla[i].nome_cla);
+            printf("   Kekkei Genkai: %s\n", cla[i].kekkei_genkai);
+            printf("   Jutsus do Clã:\n");
+            for (g = 0; g < cla[i].qtd_jutsus; g++)
+            {
+                printf("     - %s\n", jutsu[cla[i].jutsus_cla[g]].nome_jutsu);
+            }
+            PAUSE();
+        }
+    }
+}
+void op_listar_ninja(int opcao)
+{
+    int indice, i, g;
+    if (opcao == 1)
+    {
+        escolha_ninja();
+        indice = ler_intervalo(1, numN);    
+        system("clear");
+        printf("   --- DADOS DO NINJA %s ---\n", ninja[indice - 1].nome_ninja);
+        printf("   Nome: %s\n", ninja[indice - 1].nome_ninja);
+        printf("   Hierarquia: %s\n", ninja[indice - 1].hierarquia);
+        if (ninja[indice - 1].indice_cla != -1)
+        {
+            printf("   Clã: %s\n", cla[ninja[indice - 1].indice_cla].nome_cla);
+        }
+        else
+        {
+            printf("   Clã: MORTO\n");
+        }   
+        printf("   Elementos do Ninja:\n");
+        for (g = 0; g < ninja[indice - 1].numEN; g++)
+        {
+            printf("     - %s\n", ninja[indice - 1].elementos_ninja[g]);
+        }
+        printf("   Jutsus do Ninja:\n");
+        for (g = 0; g < ninja[indice - 1].qtd_jutsus; g++)
+        {
+            printf("     - %s\n", jutsu[ninja[indice - 1].jutsus_ninja[g]].nome_jutsu);
+        }       
+        PAUSE();
+    }
+    else
+    {
+        for (i = 0; i < numN; i++)
+        {
+            printf("   --- DADOS DO %d° NINJA %s ---\n", i + 1, ninja[i].nome_ninja);
+            printf("   Nome: %s\n", ninja[i].nome_ninja);
+            printf("   Hierarquia: %s\n", ninja[i].hierarquia);
+            if (ninja[i].indice_cla != -1)
+            {
+                printf("   Clã: %s\n", cla[ninja[i].indice_cla].nome_cla);
+            }
+            else
+            {
+                printf("   Clã: MORTO\n");
+            }
+            printf("   Elementos do Ninja:\n");
+            for (g = 0; g < ninja[i].numEN; g++)
+            {
+                printf("     - %s\n", ninja[i].elementos_ninja[g]);
+            }
+            printf("   Jutsus do Ninja:\n");
+            for (g = 0; g < ninja[i].qtd_jutsus; g++)
+            {
+                printf("     - %s\n", jutsu[ninja[i].jutsus_ninja[g]].nome_jutsu);
+            }
+            PAUSE();
+        }
+    }
+}
+void op_listar_missao(int opcao)
+{
+    int indice, i, g;
+    if (opcao == 1)
+    {
+        escolha_missao();
+        indice = ler_intervalo(1, numM);    
+        system("clear");
+        printf("   --- DADOS DA MISSÃO %s ---\n", missao[indice - 1].titulo);
+        printf("   Título: %s\n", missao[indice - 1].titulo);
+        printf("   Status: %s\n", missao[indice - 1].status);
+        if (missao[indice - 1].lider != -1)
+        {
+            printf("   Líder: %s\n", ninja[missao[indice - 1].lider].nome_ninja);
+        }
+        else
+        {
+            printf("   Líder: NENHUM\n");
+        }
+        printf("   Ninjas Participando:\n");
+        for (g = 0; g < missao[indice - 1].qtd_ninjas; g++)
+        {
+            if (missao[indice - 1].ninjas_participando[g] != -1)
+            {
+                printf("     - %s\n", ninja[missao[indice - 1].ninjas_participando[g]].nome_ninja);
+            }
+        }     
+        PAUSE();
+    }
+    else
+    {
+        for (i = 0; i < numM; i++)
+        {
+            system("clear");
+            printf("   --- DADOS DA MISSÃO %s ---\n", missao[i].titulo);
+            printf("   Título: %s\n", missao[i].titulo);
+            printf("   Status: %s\n", missao[i].status);
+            if (missao[i].lider != -1)
+            {
+                printf("   Líder: %s\n", ninja[missao[i].lider].nome_ninja);
+            }
+            else
+            {
+                printf("   Líder: MORTO\n");
+            }
+            if (missao[i].qtd_ninjas == 0)
+            {
+                printf("   Ninjas Participando: NENHUM\n");
+            }
+            else
+            {
+                printf("   Ninjas Participando:\n");
+                for (g = 0; g < missao[i].qtd_ninjas; g++)
+                {
+                    if (missao[i].ninjas_participando[g] != -1)
+                    {
+                        printf("     - %s\n", ninja[missao[i].ninjas_participando[g]].nome_ninja);
+                    }
+                }
+            }
+            PAUSE();
+        }
+    }
+}
+            
