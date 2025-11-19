@@ -79,6 +79,16 @@ void alterar_menu_missao();
 void alterar_jutsu_de_cla(int indice, int op);
 void alterar_jutsu_de_ninja(int op, int indice);
 
+void excluir_jutsu_cla(int jutsu_cla);
+void excluir_jutsu_ninja(int ninja_jutsu);
+void excluir_jutsu(int ex_jutsu);
+
+void excluir_cla_ninja(int cla_ninja);
+void excluir_cla(int clas);
+
+void excluir_ninja_missao(int ninja_missao);
+void excluir_ninja(int ninjago);
+
 void verifica_opcao(int op);
 void verifica_inclusao(int opcao);
 void verifica_alterar(int opcao);
@@ -98,6 +108,7 @@ int verifica_se_lider_em_missao(int lider);
 int verifica_sim_nao(char straux[10]);
 void verifica_alterar(int alternar);
 int verifica_jutsu_em_lugar(int jutsu_lugar);
+void verifica_excluir(int op);
 
 void inclusao_jutsu();
 void inclusao_cla();
@@ -198,8 +209,8 @@ void menu_exclusao()
     printf("\n=========================================\n");
     printf("            MENU DE EXCLUSÕES           ");
     printf("\n=========================================\n\n");
-    printf("   [1] - Excluir Clã\n");
-    printf("   [2] - Excluir Jutsu\n");
+    printf("   [1] - Excluir Jutsu\n");
+    printf("   [2] - Excluir Cla\n");
     printf("   [3] - Excluir Ninja\n");
     printf("   [4] - Excluir Missão\n");
     printf("   [5] - Voltar\n");
@@ -305,6 +316,16 @@ void verifica_opcao(int op)
             opcao = ler_intervalo(1, 5);
             system("clear");
             verifica_alterar(opcao);
+        }
+    }
+    else if (op == 3)
+    {
+        while(opcao != 5)
+        {
+            menu_exclusao();
+            opcao = ler_intervalo(1, 5);
+            system("clear");
+            verifica_excluir(opcao);
         }
     }
 }
@@ -628,6 +649,67 @@ void verifica_alterar(int altera)
     }
 }
 
+void verifica_excluir(int op)
+{
+    int opcao, erro;
+    char straux[10];
+    if (op == 1)
+    {
+        printf("--- JUTSUS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+        printf("   [0] - Para voltar\n");
+        escolha_jutsu();
+        opcao = ler_intervalo(1, numJ);
+        printf("   SE O JUTSU ESTIVER PRESENTE EM CLA OU NINJA ELE SERA EXCLUIDO EM AMBOS OS LUGARES!\n");
+        printf("   Deseja prosseguir? (s/n):");
+        fgets(straux, sizeof(straux), stdin);
+        erro = verifica_sim_nao(straux);
+        if (erro == 0)
+        {
+            excluir_jutsu_cla(opcao - 1);
+            excluir_jutsu_ninja(opcao - 1);
+            excluir_jutsu(opcao - 1);
+            system("clear");
+            printf("   Exclusão do jutsu feita com sucesso!\n");
+            PAUSE();
+        }
+    }
+    else if (op == 2)
+    {
+        printf("--- CLAS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+        escolha_cla();
+        opcao = ler_intervalo(1, numC);
+        printf("   SE CLA ESTIVER PRESENTE EM ALGUM NINJA, O CLA SERA DADO COMO MORTO!\n");
+        printf("   Deseja prosseguir? (s/n):");
+        fgets(straux, sizeof(straux), stdin);
+        erro = verifica_sim_nao(straux);
+        if (erro == 0)
+        {
+            excluir_cla_ninja(opcao - 1);
+            excluir_cla(opcao - 1);
+            system("clear");
+            printf("   Exclusão do cla feita com sucesso!");
+            PAUSE();
+        }
+    }
+    else if (op == 3)
+    {
+        printf("--- NINJAS DISPONIVEIS PARA EXCLUIR ABAIXO ---\n");
+        escolha_ninja();
+        opcao = ler_intervalo(1, numN);
+        printf("   SE O NINJA FOR O LIDER DE UMA MISSAO ELE SERA DADO COMO MORTO, O MESMO PARA O NINJA");
+        printf("   Deseja prosseguir? (s/n):");
+        fgets(straux, sizeof(straux), stdin);
+        erro = verifica_sim_nao(straux);
+        if (erro == 0)
+        {
+            excluir_ninja_missao(opcao - 1);
+            excluir_ninja(opcao - 1);
+            system("clear");
+            printf("   Exclusao do ninja feita com sucesso!");
+            PAUSE();
+        }
+    }
+}
 void inclusao_jutsu()
 {
     if (numJ == 0)
@@ -1061,26 +1143,10 @@ void cria_ninja()
         }
         else
         {
-            printf("   Deseja adicionar um clã ao ninja? (s/n): ");
-            fgets(op, sizeof(op), stdin);
-            erro = verifica_sim_nao(op);
-            if (erro == 0)
-            {
-                escolha_cla();
-                ninja[numN].indice_cla = ler_intervalo(1, numC);
-                ninja[numN].indice_cla = ninja[numN].indice_cla - 1;
-                break;
-            }
-            else if (erro == 1)
-            {
-                mensagem_erro(-12);
-                PAUSE();
-                erro = 0;
-            }
-            else
-            {
-                mensagem_erro(-2);
-            }
+            escolha_cla();
+            ninja[numN].indice_cla = ler_intervalo(1, numC);
+            ninja[numN].indice_cla = ninja[numN].indice_cla - 1;
+            break;
         }
     }
 
@@ -2263,18 +2329,11 @@ void alterar(int altera, int indice, int caso)
                     PAUSE();
                 }
             }
-            while (1)
+            while (aux != 6)
             {
                 opcao_alterar_jutsu_de_cla();
                 aux = ler_intervalo(1, 6);
-                if (aux == 6)
-                {
-                    break;
-                }
-                else
-                {
-                    alterar_jutsu_de_cla(indice, aux);
-                }
+                alterar_jutsu_de_cla(indice, aux);
             }
         }
     break;
@@ -3231,5 +3290,178 @@ void alterar_jutsu_de_ninja(int op, int indice)
             printf("   Exclusão dos jutsus feita com sucesso!");
             PAUSE();
         }
+    }
+}
+void excluir_jutsu_cla(int jutsu_cla)
+{
+    int i, g, aux;
+    for (i = 0; i < numC; i++)
+    {
+        for (g = 0; g < cla[i].qtd_jutsus; g++)
+        {
+            if (cla[i].jutsus_cla[g] == jutsu_cla)
+            {
+                for (aux = jutsu_cla; aux < cla[i].qtd_jutsus - 1; aux++)
+                {
+                    cla[i].jutsus_cla[aux] = cla[i].jutsus_cla[aux + 1];
+                }
+                cla[i].qtd_jutsus--;
+                if (cla[i].qtd_jutsus > 0)
+                {
+                    cla[i].jutsus_cla = (int*) realloc(cla[i].jutsus_cla, cla[i].qtd_jutsus * sizeof(int));
+                }
+                else
+                {
+                    free(cla[i].jutsus_cla);
+                    cla[i].jutsus_cla = NULL;
+                    cla[i].qtd_jutsus = 0;
+                }
+            }
+        }
+    }
+}
+void excluir_jutsu_ninja(int jutsu_ninja)
+{
+    int i, g, aux;
+    for (i = 0; i < numN; i++)
+    {
+        for (g = 0; g < ninja[i].qtd_jutsus; g++)
+        {
+            if (ninja[i].jutsus_ninja[g] == jutsu_ninja)
+            {
+                for (aux = jutsu_ninja; aux < ninja[i].qtd_jutsus - 1; aux++)
+                {
+                    ninja[i].jutsus_ninja[aux] = ninja[i].jutsus_ninja[aux + 1];
+                }
+                ninja[i].qtd_jutsus--;
+                if (ninja[i].qtd_jutsus > 0)
+                {
+                    ninja[i].jutsus_ninja = (int*) realloc(ninja[i].jutsus_ninja, ninja[i].qtd_jutsus * sizeof(int));
+                }
+                else
+                {
+                    free(ninja[i].jutsus_ninja);
+                    ninja[i].jutsus_ninja = NULL;
+                    ninja[i].qtd_jutsus = 0;
+                }
+            }
+        }
+    }
+}
+void excluir_jutsu(int ex_jutsu)
+{
+    int i;
+    free(jutsu[ex_jutsu].nome_jutsu);
+    free(jutsu[ex_jutsu].tipo_jutsu);
+    
+    for (i = 0; i < jutsu[ex_jutsu].numE; i++)
+    {
+        free(jutsu[ex_jutsu].elemento_jutsu[i]);
+    }
+    free(jutsu[ex_jutsu].elemento_jutsu);
+    
+    for (i = ex_jutsu; i < numJ - 1; i++)
+    {
+        jutsu[i] = jutsu[i + 1];
+    }
+    numJ--;
+    if (numJ > 0)
+    {
+        jutsu = (TJutsu*) realloc(jutsu, numJ * sizeof(TJutsu));
+    }
+    else
+    {
+        free(jutsu);
+        jutsu = NULL;
+        numJ = 0;
+    }
+}
+void excluir_cla_ninja(int cla_ninja)
+{
+    int i;
+    for (i = 0; i < numN; i++)
+    {
+        if (cla_ninja == ninja[i].indice_cla)
+        {
+            ninja[i].indice_cla = -1;
+        }
+    }
+}
+void excluir_cla(int clas)
+{
+    int i;
+    
+    free(cla[clas].nome_cla);
+    free(cla[clas].kekkei_genkai);
+    if (cla[clas].jutsus_cla != NULL)
+    {
+        free(cla[clas].jutsus_cla);
+    }
+    
+    for (i = clas; i < numC - 1; i++)
+    {
+        cla[i] = cla[i + 1];
+    }
+    numC--;
+    if (numC > 0)
+    {
+        cla = (TCla*) realloc(cla, numC * sizeof(TCla));
+    }
+    else
+    {
+        free(cla);
+        cla = NULL;
+        numC = 0;
+    }
+}
+void excluir_ninja_missao(int ninja_missao)
+{
+    int i, g;
+    for (i = 0; i < numM; i++)
+    {
+        if (ninja_missao == missao[i].lider)
+        {
+            missao[i].lider = -1;
+        }
+    }
+    for (i = 0; i < numM; i++)
+    {
+        for (g = 0; g < missao[i].qtd_ninjas; g++)
+        {
+            if (ninja_missao == missao[i].ninjas_participando[g])
+            {
+                missao[i].ninjas_participando[g] = -1;
+            }
+        }
+    }
+}
+void excluir_ninja(int ninjago)
+{
+    int i;
+    free(ninja[ninjago].nome_ninja);
+    free(ninja[ninjago].hierarquia);
+    
+    for (i = 0; i < ninja[ninjago].numEN; i++)
+    {
+        free(ninja[ninjago].elementos_ninja[i]);
+    }
+    
+    free(ninja[ninjago].elementos_ninja);
+    free(ninja[ninjago].jutsus_ninja);
+    
+    for (i = ninjago; i < numN - 1; i++)
+    {
+        ninja[i] = ninja[i + 1];
+    }
+    numN--;
+    if (numN > 0)
+    {
+        ninja = (TNinja*) realloc(ninja, numN * sizeof(TNinja));
+    }
+    else
+    {
+        free(ninja);
+        ninja = NULL;
+        numN = 0;
     }
 }
