@@ -3961,4 +3961,15 @@ void op_listar_missao(int opcao)
         }
     }
 }
-            
+
+void salva_dados()
+{
+    FILE *arq = fopen("tca.txt", "w");
+    if (arq == NULL)
+    {
+        printf("Erro ao abrir o arquivo para salvar os dados.\n");
+        return;
+    }
+
+    
+}
