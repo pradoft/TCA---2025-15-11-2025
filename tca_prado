@@ -39,7 +39,7 @@ typedef struct
 {
     char *titulo;
     int lider;
-    char rank;
+    char *rank;
     char *status;
     int *ninjas_participando;
     int qtd_ninjas;
@@ -72,9 +72,11 @@ void salva_ninjas();
 void salva_missoes();
 
 void recupera_jutsus();
-void recupera_clas();
+void recupera_cla();
 void recupera_ninjas();
 void recupera_missoes();
+
+void liberar_ponteiros();
 
 void menu_crud();
 void menu_inclusao();
@@ -169,7 +171,10 @@ int ler_intervalo(int min, int max);
 int main()
 {
     int opcao = 1;
-    recupera_dados();
+    recupera_jutsus();
+    recupera_cla();
+    recupera_ninjas();
+    recupera_missoes();
     system("clear");
     while (opcao != 5)
     {
@@ -178,7 +183,12 @@ int main()
         system("clear");
         verifica_opcao(opcao);
     }
-    salva_dados();
+    salva_jutsus();
+    salva_clas();
+    salva_ninjas();
+    salva_missoes();
+    
+    liberar_ponteiros();
     return 0;
 }
 
@@ -867,15 +877,7 @@ void cria_jutsu()
             break;
         }
     }
-    if (erro == 1)
-    {
-        strcpy(straux, "Nenhum");
-        jutsu[numJ].elemento_jutsu = (char **)malloc(sizeof(char *));
-        jutsu[numJ].elemento_jutsu[0] = (char *)malloc((strlen(straux) + 1) * sizeof(char));
-        strcpy(jutsu[numJ].elemento_jutsu[0], straux);
-        jutsu[numJ].numE = 1;
-    }
-    else
+    if (erro == 0)
     {
         jutsu[numJ].numE = 0;
         while (erro == 0)
@@ -887,7 +889,7 @@ void cria_jutsu()
 
                 config_string(straux);
 
-                jutsu[numJ].elemento_jutsu = (char **)malloc(sizeof(char *));
+                jutsu[numJ].elemento_jutsu = (char **)malloc(sizeof(char*));
                 jutsu[numJ].elemento_jutsu[jutsu[numJ].numE] = (char *)malloc((strlen(straux) + 1) * sizeof(char));
                 strcpy(jutsu[numJ].elemento_jutsu[jutsu[numJ].numE], straux);
                 jutsu[numJ].numE++;
@@ -1464,9 +1466,14 @@ void cria_missao()
             if (erro == 0)
             {
                 escolha_ninja();
-                indice = ler_intervalo(1, numN);
+                indice = ler_intervalo(0, numN);
                 existe = verifica_ninja_missao(indice - 1);
-                if (existe == 0)
+                if (indice == 0)
+                {
+                    system("clear");
+                    inclusao_ninja();
+                }
+                else if (existe == 0)
                 {
                     missao[numM].ninjas_participando = (int*) malloc(sizeof(int));
                     missao[numM].ninjas_participando[missao[numM].qtd_ninjas] = indice - 1;
@@ -1495,7 +1502,12 @@ void cria_missao()
                 escolha_ninja();
                 indice = ler_intervalo(1, numN);
                 existe = verifica_ninja_missao(indice - 1);
-                if (existe == 0)
+                if (indice == 0)
+                {
+                    system("clear");
+                    inclusao_ninja();
+                }
+                else if (existe == 0)
                 {
                     missao[numM].ninjas_participando = (int*) realloc(missao[numM].ninjas_participando, (missao[numM].qtd_ninjas + 1) * sizeof(int));
                     missao[numM].ninjas_participando[missao[numM].qtd_ninjas] = indice - 1;
@@ -1899,22 +1911,38 @@ void escolha_rank()
 
 void rank_escolhido(int rank, int missao_atual)
 {
+    char aux[3];
     switch (rank)
     {
     case 1:
-        missao[missao_atual].rank = 'S';
+        aux[0] = 'S';
+        aux[1] = '\0';
+        missao[missao_atual].rank = (char*) malloc((strlen(aux) + 1) * sizeof(char));
+        strcpy(missao[missao_atual].rank, aux);
         break;
     case 2:
-        missao[missao_atual].rank = 'A';
+        aux[0] = 'A';
+        aux[1] = '\0';
+        missao[missao_atual].rank = (char*) malloc((strlen(aux) + 1) * sizeof(char));
+        strcpy(missao[missao_atual].rank, aux);
         break;
     case 3:
-        missao[missao_atual].rank = 'B';
+        aux[0] = 'B';
+        aux[1] = '\0';
+        missao[missao_atual].rank = (char*) malloc((strlen(aux) + 1) * sizeof(char));
+        strcpy(missao[missao_atual].rank, aux);
         break;
     case 4:
-        missao[missao_atual].rank = 'C';
+        aux[0] = 'C';
+        aux[1] = '\0';
+        missao[missao_atual].rank = (char*) malloc((strlen(aux) + 1) * sizeof(char));
+        strcpy(missao[missao_atual].rank, aux);
         break;
     case 5:
-        missao[missao_atual].rank = 'D';
+        aux[0] = 'D';
+        aux[1] = '\0';
+        missao[missao_atual].rank = (char*) malloc((strlen(aux) + 1) * sizeof(char));
+        strcpy(missao[missao_atual].rank, aux);
         break;
     default:
         break;
@@ -2206,9 +2234,6 @@ void alterar(int altera, int indice, int caso)
     case 1:
         if (caso == 1)
         {
-            printf("\n=========================================\n");
-            printf("         ALTERAÇÃO DE NOME DO JUTSU               ");
-            printf("\n=========================================\n");
             while (1)
             {
                 printf("   Digite o novo nome do jutsu %s: ", jutsu[indice - 1].nome_jutsu);
@@ -2544,63 +2569,16 @@ void alterar(int altera, int indice, int caso)
     }
     else if (caso == 5)
     {
-        erro = 0;
-        while(erro == 0)
+        aux = 1;
+        while(aux != 5)
         {
-            if (ninja[indice - 1].qtd_jutsus == 0)
+            opcao_alterar_jutsu_de_ninja();
+            aux = ler_intervalo(1, 5);
+            if (aux != 5)
             {
-                printf("   No ninja não há nenhum jutsu cadastrado, deseja adicionar um jutsu ao ninja? (s/n):");
-                fgets(op, sizeof(op), stdin);
-                erro = verifica_sim_nao(op);
-                if (erro == 0)
-                {
-                    if (numJ == 0)
-                    {
-                        escolha_jutsu();
-                        fgets(op, sizeof(op), stdin);
-                        erro = verifica_sim_nao(op);
-                        if (erro == 0)
-                        {
-                            system("clear");
-                            inclusao_jutsu();
-                        }
-                    }
-                    else
-                    {
-                        escolha_jutsu();
-                        aux = ler_intervalo(0, numJ);
-                        if (aux == 0)
-                        {
-                            system("clear");
-                            inclusao_jutsu();
-                        }
-                        else
-                        {
-                            ninja[indice - 1].jutsus_ninja[ninja[indice - 1].qtd_jutsus] = aux - 1;
-                            ninja[indice - 1].qtd_jutsus++;
-                        }
-                    }
-                }   
+                alterar_jutsu_de_ninja(aux, indice);
             }
-            else
-            {
-                aux = 1;
-                while(1)
-                {
-                    opcao_alterar_jutsu_de_ninja();
-                    aux = ler_intervalo(1, 6);
-                    if (aux == 6)
-                    {
-                        erro = -1;
-                        break;
-                    }
-                    else
-                    {
-                        alterar_jutsu_de_ninja(aux, indice);
-                    }
-                }
-            }
-        }
+        }   
     }
     else if (caso == 6)
     {
@@ -2664,82 +2642,12 @@ void alterar(int altera, int indice, int caso)
         
         ninja[indice - 1].indice_cla = aux - 1;
         
-        erro = 0;
-        while(erro == 0)
+        aux = 1;
+        while(aux != 5)
         {
-            if (ninja[indice - 1].qtd_jutsus == 0)
-            {
-                printf("   No ninja não há nenhum jutsu cadastrado, deseja cadastrar um jutsu? (s/n):");
-                fgets(op, sizeof(op), stdin);
-                erro = verifica_sim_nao(op);
-                if (erro == 0)
-                {
-                    if (numJ == 0)
-                    {
-                        escolha_jutsu();
-                        fgets(op, sizeof(op), stdin);
-                        erro = verifica_sim_nao(op);
-                        if (erro == 0)
-                        {
-                            system("clear");
-                            inclusao_jutsu();
-                        }
-                    }
-                }   
-            }
-            else
-            {
-                printf("--- OPCOES DE JUTSU PARA ALTERAR NO NINJA ABAIXO ---\n\n");
-                printf("   [0] - Para voltar\n");
-                for (i = 0; i < ninja[indice - 1].qtd_jutsus; i++)
-                {
-                    printf("   [%d°] %s\n", i + 1, jutsu[ninja[indice - 1].jutsus_ninja[i]].nome_jutsu);
-                }
-                printf("   Qual dos jutsus deseja alterar?:");
-                aux = ler_intervalo(0, ninja[indice - 1].qtd_jutsus);
-            
-                erro = -1;
-                while(erro != 0)
-                {
-                    printf("   Opções de jutsu para alterar o jutsu %s do ninja %s:\n", jutsu[ninja[indice - 1].jutsus_ninja[aux - 1]].nome_jutsu, ninja[indice - 1].nome_ninja);
-                    escolha_jutsu();
-                    aux2 = ler_intervalo(1, numJ);
-                    erro = verifica_anterior(aux2 - 1, indice - 1);
-                    if (erro == 0)
-                    {
-                        ninja[indice - 1].jutsus_ninja[aux - 1] = aux2 - 1;
-                    }
-                    else
-                    {
-                        mensagem_erro(-15);
-                        PAUSE();
-                        printf("   Deseja adicionar um novo jutsu para alterar o jutsu que desejava alterar? (s/n):");
-                        fgets(op, sizeof(op), stdin);
-                        erro = verifica_sim_nao(op);
-                        if (erro == 0)
-                        {
-                            system("clear");
-                            inclusao_jutsu();
-                            printf("   Voce sera redirecionado a alteração do jutsu que desejava");
-                            PAUSE();
-                            erro = -1;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }  
-                }
-
-                printf("   Deseja alterar mais um jutsu do ninja? (s/n):");
-                fgets(op, sizeof(op), stdin);
-                erro = verifica_sim_nao(op);
-                if (erro == -1)
-                {
-                    mensagem_erro(-2);
-                    PAUSE();
-                }
-            }
+            opcao_alterar_jutsu_de_ninja();
+            aux = ler_intervalo(1, 5);
+            alterar_jutsu_de_ninja(aux, indice);
         }
 
         printf("   Digite a nova quantidade de chakra [1] - [100] que vai substituir a quantidade %d atual do ninja %s:", ninja[indice - 1].qtd_chakra, ninja[indice - 1].nome_ninja);
@@ -2943,6 +2851,7 @@ void alterar_op_elementos_jutsu_menu()
     printf("   [4] - Excluir todos os elementos do jutsu\n");
     printf("   [5] - Adicionar um novo elemento ao jutsu\n");
     printf("   [6] - Sair\n");
+    printf("   Digite uma opção:");
 }
 
 void opcao_elemento_jutsu(int opcao, int indice)
@@ -2954,7 +2863,11 @@ void opcao_elemento_jutsu(int opcao, int indice)
     case 1:
         if (jutsu[indice - 1].numE > 0)
         {
-            printf("   Qual elemento deseja alterar?: ");
+            for (i = 0; i < jutsu[indice - 1].numE; i++)
+            {
+                printf("   [%d°] - %s\n", i + 1, jutsu[indice - 1].elemento_jutsu[i]);
+            }
+            printf("   Qual elemento deseja alterar do jutsu %s?: ", jutsu[indice - 1].nome_jutsu);
             i = ler_intervalo(1, jutsu[indice - 1].numE);
             printf("   Digite o novo elemento do jutsu: ");
             fgets(straux, sizeof(straux), stdin);
@@ -2967,20 +2880,33 @@ void opcao_elemento_jutsu(int opcao, int indice)
             printf("   Elemento do jutsu alterado com sucesso!\n");
             PAUSE();
         }
+        else
+        {
+            printf("   Não há nenhum elemento cadastrado no jutsu!\n");
+            PAUSE();
+        }
         break;
     case 2:
-        for (i = 0; i < jutsu[indice - 1].numE; i++)
+        if (jutsu[indice - 1].numE > 0)
         {
-            printf("   Digite o novo %d° elemento do jutsu: ", i + 1);
-            fgets(straux, sizeof(straux), stdin);
-            config_string(straux);
+            for (i = 0; i < jutsu[indice - 1].numE; i++)
+            {
+                printf("   Digite o novo %d° elemento do jutsu: ", i + 1);
+                fgets(straux, sizeof(straux), stdin);
+                config_string(straux);
             
-            free(jutsu[indice - 1].elemento_jutsu[i]);
-            jutsu[indice - 1].elemento_jutsu[i] = (char *)malloc((strlen(straux) + 1) * sizeof(char));
-            strcpy(jutsu[indice - 1].elemento_jutsu[i], straux);
+                free(jutsu[indice - 1].elemento_jutsu[i]);
+                jutsu[indice - 1].elemento_jutsu[i] = (char *)malloc((strlen(straux) + 1) * sizeof(char));
+                strcpy(jutsu[indice - 1].elemento_jutsu[i], straux);
+            }
+            printf("   Todos os elementos do jutsu alterados com sucesso!\n");
+            PAUSE();
         }
-        printf("   Todos os elementos do jutsu alterados com sucesso!\n");
-        PAUSE();
+        else
+        {
+            printf("   Não há nenhum elemento cadastrado no jutsu!\n");
+            PAUSE();
+        }
         break;
     case 3:
         if (jutsu[indice - 1].numE > 0)
@@ -2997,29 +2923,52 @@ void opcao_elemento_jutsu(int opcao, int indice)
             printf("   Elemento do jutsu excluído com sucesso!\n");
             PAUSE();
         }
+        else
+        {
+            printf("   Não há nenhum elemento para excluir!\n");
+            PAUSE();
+        }
         break;
     case 4:
-        for (i = 0; i < jutsu[indice - 1].numE; i++)
+        if (jutsu[indice - 1].numE > 0)
         {
-            free(jutsu[indice - 1].elemento_jutsu[i]);
+            for (i = 0; i < jutsu[indice - 1].numE; i++)
+            {
+                free(jutsu[indice - 1].elemento_jutsu[i]);
+            }
+            free(jutsu[indice - 1].elemento_jutsu);
+            jutsu[indice - 1].elemento_jutsu = NULL;
+            jutsu[indice - 1].numE = 0;
         }
-        free(jutsu[indice - 1].elemento_jutsu);
-        jutsu[indice - 1].elemento_jutsu = NULL;
-        jutsu[indice - 1].numE = 0;
+        else
+        {
+            printf("   Nao há nenhum elemento para excluir.\n");
+            PAUSE();
+        }
         break;
     case 5:
-        printf("   Digite o novo elemento do jutsu: ");
-        fgets(straux, sizeof(straux), stdin);
-        config_string(straux);
-        
-        novo_numE = jutsu[indice - 1].numE + 1;
-        jutsu[indice - 1].elemento_jutsu = (char **)realloc(jutsu[indice - 1].elemento_jutsu, novo_numE * sizeof(char *));
-        jutsu[indice - 1].elemento_jutsu[novo_numE - 1] = (char *)malloc((strlen(straux) + 1) * sizeof(char));
-        strcpy(jutsu[indice - 1].elemento_jutsu[novo_numE - 1], straux);
-        jutsu[indice - 1].numE++;
-        
-        printf("   Novo elemento do jutsu adicionado com sucesso!\n");
-        PAUSE();
+        if (jutsu[indice - 1].numE == 0)
+        {
+            printf("   Nome do primeiro elemento do jutsu:");
+            fgets(straux, sizeof(straux), stdin);
+            config_string(straux);
+            
+            jutsu[indice - 1].elemento_jutsu = (char**) malloc((jutsu[indice - 1].numE + 1) * sizeof(char*));
+            jutsu[indice - 1].elemento_jutsu[jutsu[indice - 1].numE] = (char*) malloc((strlen(straux) + 1) * sizeof(char));
+            strcpy(jutsu[indice - 1].elemento_jutsu[jutsu[indice - 1].numE], straux);
+            jutsu[indice - 1].numE++;
+        }
+        else
+        {
+            printf("   Digite o %d elemento do jutsu:", jutsu[indice - 1].numE + 1);
+            fgets(straux, sizeof(straux), stdin);
+            config_string(straux);
+            
+            jutsu[indice - 1].elemento_jutsu = (char**) realloc(jutsu[indice - 1].elemento_jutsu, (jutsu[indice - 1].numE + 1) * sizeof(char*));
+            jutsu[indice - 1].elemento_jutsu[jutsu[indice - 1].numE] = (char*) malloc((strlen(straux) + 1) * sizeof(char));
+            strcpy(jutsu[indice - 1].elemento_jutsu[jutsu[indice - 1].numE], straux);
+            jutsu[indice - 1].numE++;
+        }
         break;
     }
 }
@@ -3734,6 +3683,7 @@ void verifica_listar(int op)
         if (numN == 0)
         {
             printf("   Não há ninjas cadastrados no sistema.\n");
+            PAUSE();
         }
         else
         {
@@ -3972,136 +3922,155 @@ void op_listar_missao(int opcao)
 void salva_jutsus()
 {
     int i, j;
-    FILE *arq_jutsu = fopen("tca.txt", "w");
+    FILE *arq_jutsu = fopen("jutsus.txt", "w");
     if (arq_jutsu == NULL)
     {
-        printf("Erro ao abrir o arquivo para salvar os dados.\n");
-        return;
+        printf("Erro ao abrir o arquivo para salvar os dados dos jutsus.\n");
     }
-    
-    for (i = 0; i < numJ; i++)
+    else
     {
-        fprintf(arq_jutsu, "%s,", jutsu[i].nome_jutsu);
-        fprintf(arq_jutsu, "%s,", jutsu[i].tipo_jutsu);
-        fprintf(arq_jutsu, "%d,", jutsu[i].numE);
-        for (j = 0; j < jutsu[i].numE; j++)
+        for (i = 0; i < numJ; i++)
         {
-            fprintf(arq_jutsu, "%s.", jutsu[i].elemento_jutsu[j]);
+            fprintf(arq_jutsu, "%s,", jutsu[i].nome_jutsu);
+            fprintf(arq_jutsu, "%s,", jutsu[i].tipo_jutsu);
+            fprintf(arq_jutsu, "%d,", jutsu[i].numE);
+            for (j = 0; j < jutsu[i].numE; j++)
+            {
+                fprintf(arq_jutsu, "%s.", jutsu[i].elemento_jutsu[j]);
+            }
+            fprintf(arq_jutsu, "%d,", jutsu[i].custo_chakra);
+            fprintf(arq_jutsu, "%d,", jutsu[i].poder_chakra);
+            fprintf(arq_jutsu, "\n");
         }
-        fprintf(arq_jutsu, "%d,", jutsu[i].custo_chakra);
-        fprintf(arq_jutsu, "%d,", jutsu[i].poder_chakra);
-        fprintf(arq_jutsu, "\n");
     }
     fclose(arq_jutsu);
 }
-void salva_cla()
+void salva_clas()
 {
     int i, j;
-    FILE *arq_cla = fopen("tca_cla.txt", "w");
+    FILE *arq_cla = fopen("clas.txt", "w");
     if (arq_cla == NULL)
     {
-        printf("Erro ao abrir o arquivo para salvar os dados.\n");
-        return;
+        printf("Erro ao abrir o arquivo para salvar dados dos clas.\n");
     }
-    
-    for (i = 0; i < numC; i++)
+    else
     {
-        fprintf(arq_cla, "%s,", cla[i].nome_cla);
-        fprintf(arq_cla, "%s,", cla[i].kekkei_genkai);
-        fprintf(arq_cla, "%d,", cla[i].qtd_jutsus);
-        for (j = 0; j < cla[i].qtd_jutsus; j++)
+        for (i = 0; i < numC; i++)
         {
-            fprintf(arq_cla, "%d.", cla[i].jutsus_cla[j]);
+            fprintf(arq_cla, "%s,", cla[i].nome_cla);
+            fprintf(arq_cla, "%s,", cla[i].kekkei_genkai);
+            fprintf(arq_cla, "%d,", cla[i].qtd_jutsus);
+            for (j = 0; j < cla[i].qtd_jutsus; j++)
+            {
+                fprintf(arq_cla, "%d.", cla[i].jutsus_cla[j]);
+            }
+            fprintf(arq_cla, "\n");
         }
-        fprintf(arq_cla, "\n");
     }
     fclose(arq_cla);
 }
-void salva_ninja()
+
+void salva_ninjas()
 {
     int i, j;
-    FILE *arq_ninja = fopen("tca_ninja.txt", "w");
+    FILE *arq_ninja = fopen("ninjas.txt", "w");
     if (arq_ninja == NULL)
     {
-        printf("Erro ao abrir o arquivo para salvar os dados.\n");
-        return;
+        printf("Erro ao abrir o arquivo para salvar dados dos ninjas.\n");
     }
-    
-    for (i = 0; i < numN; i++)
+    else
     {
-        fprintf(arq_ninja, "%s,", ninja[i].nome_ninja);
-        fprintf(arq_ninja, "%s,", ninja[i].hierarquia);
-        fprintf(arq_ninja, "%d,", ninja[i].indice_cla);
-        fprintf(arq_ninja, "%d,", ninja[i].numEN);
-        for (j = 0; j < ninja[i].numEN; j++)
+        for (i = 0; i < numN; i++)
         {
-            fprintf(arq_ninja, "%s.", ninja[i].elementos_ninja[j]);
+            fprintf(arq_ninja, "%s,", ninja[i].nome_ninja);
+            fprintf(arq_ninja, "%s,", ninja[i].hierarquia);
+            fprintf(arq_ninja, "%d,", ninja[i].numEN);
+            for (j = 0; j < ninja[i].numEN; j++)
+            {
+                fprintf(arq_ninja, "%s.", ninja[i].elementos_ninja[j]);
+            }
+            fprintf(arq_ninja, "%d,", ninja[i].qtd_chakra);
+            fprintf(arq_ninja, "%d,", ninja[i].indice_cla);
+            fprintf(arq_ninja, "%d,", ninja[i].qtd_jutsus);
+            for (j = 0; j < ninja[i].qtd_jutsus; j++)
+            {
+                fprintf(arq_ninja, "%d.", ninja[i].jutsus_ninja[i]);
+            }
+            fprintf(arq_ninja, "\n");
         }
-        fprintf(arq_ninja, "%d,", ninja[i].qtd_jutsus);
-        for (j = 0; j < ninja[i].qtd_jutsus; j++)
-        {
-            fprintf(arq_ninja, "%d.", ninja[i].jutsus_ninja[j]);
-        }
-        fprintf(arq_ninja, "\n");
     }
     fclose(arq_ninja);
 }
-void salva_missao()
+void salva_missoes()
 {
     int i, j;
-    FILE *arq_missao = fopen("tca_missao.txt", "w");
+    FILE *arq_missao = fopen("missao.txt", "w");
     if (arq_missao == NULL)
     {
-        printf("Erro ao abrir o arquivo para salvar os dados.\n");
-        return;
+        printf("Erro ao abrir arquivo para salvar os dados da missao. \n");
     }
-    
-    for (i = 0; i < numM; i++)
+    else
     {
-        fprintf(arq_missao, "%s,", missao[i].titulo);
-        fprintf(arq_missao, "%s,", missao[i].status);
-        fprintf(arq_missao, "%d,", missao[i].lider);
-        fprintf(arq_missao, "%d,", missao[i].qtd_ninjas);
-        for (j = 0; j < missao[i].qtd_ninjas; j++)
+        for (i = 0; i < numM; i++)
         {
-            fprintf(arq_missao, "%d.", missao[i].ninjas_participando[j]);
+            fprintf(arq_missao, "%s,", missao[i].titulo);
+            fprintf(arq_missao, "%d,", missao[i].lider);
+            fprintf(arq_missao, "%s,", missao[i].rank);
+            fprintf(arq_missao, "%s,", missao[i].status);
+            fprintf(arq_missao, "%d,", missao[i].qtd_ninjas);
+            for (j = 0; j < missao[i].qtd_ninjas; j++)
+            {
+                fprintf(arq_missao, "%d.", missao[i].ninjas_participando[j]);
+            }
+            fprintf(arq_missao, "\n");
         }
-        fprintf(arq_missao, "\n");
     }
     fclose(arq_missao);
 }
-
 void recupera_jutsus()
 {
-    int i, j;
-    char buffer[256];
-    FILE *arq_jutsu = fopen("tca.txt", "r");
+    int i;
+    char string_aux[256];
+    char *token;
+    FILE *arq_jutsu = fopen("jutsus.txt", "r");
     if (arq_jutsu == NULL)
     {
         return;
     }
-    
-    while (fgets(buffer, sizeof(buffer), arq_jutsu))
+    else
     {
-        if (numJ == 0)
+        while (fgets(string_aux, sizeof(string_aux), arq_jutsu))
         {
-            jutsu = (TJutsu*) malloc((numJ + 1) * sizeof(TJutsu));
-            char *token = strtok(buffer, ",");
+            string_aux[strcspn(string_aux, "\n")] = '\0';
+            if (numJ == 0)
+            {
+                jutsu = (TJutsu*) malloc(sizeof(TJutsu)); 
+            }
+            else
+            {
+                jutsu = (TJutsu*) realloc(jutsu, (numJ + 1) * sizeof(TJutsu));
+            }
+        
+            token = strtok(string_aux, ",");
+            jutsu[numJ].nome_jutsu = (char*) malloc((strlen(token) + 1) * sizeof(char));
             strcpy(jutsu[numJ].nome_jutsu, token);
         
             token = strtok(NULL, ",");
-            jutsu[numJ].tipo_jutsu = strdup(token);
+            jutsu[numJ].tipo_jutsu = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            strcpy(jutsu[numJ].tipo_jutsu, token);
         
             token = strtok(NULL, ",");
             jutsu[numJ].numE = atoi(token);
-        
-            jutsu[numJ].elemento_jutsu = (char**) malloc(jutsu[numJ].numE * sizeof(char*));
-            token = strtok(NULL, ",");
-            char *elemento_token = strtok(token, ".");
-            for (i = 0; i < jutsu[numJ].numE; i++)
+    
+            if (jutsu[numJ].numE != 0)
             {
-                jutsu[numJ].elemento_jutsu[i] = strdup(elemento_token);
-                elemento_token = strtok(NULL, ".");
+                jutsu[numJ].elemento_jutsu = (char**) malloc((jutsu[numJ].numE + 1)  * sizeof(char*));
+                for (i = 0; i < jutsu[numJ].numE; i++)
+                {
+                    token = strtok(NULL, ".");
+                    jutsu[numJ].elemento_jutsu[i] = (char*) malloc((strlen(token) + 1) * sizeof(char));
+                    strcpy(jutsu[numJ].elemento_jutsu[i], token);
+                }
             }
         
             token = strtok(NULL, ",");
@@ -4109,39 +4078,280 @@ void recupera_jutsus()
         
             token = strtok(NULL, ",");
             jutsu[numJ].poder_chakra = atoi(token);
-        
-            numJ++;
-        }
-        else
-        {
-            jutsu = (TJutsu*) realloc(jutsu, (numJ + 1) * sizeof(TJutsu));
-            char *token = strtok(buffer, ",");
-            strcpy(jutsu[numJ].nome_jutsu, token);
-        
-            token = strtok(NULL, ",");
-            jutsu[numJ].tipo_jutsu = strdup(token);
-        
-            token = strtok(NULL, ",");
-            jutsu[numJ].numE = atoi(token);
-        
-            jutsu[numJ].elemento_jutsu = (char**) malloc(jutsu[numJ].numE * sizeof(char*));
-            token = strtok(NULL, ",");
-            char *elemento_token = strtok(token, ".");
-            for (i = 0; i < jutsu[numJ].numE; i++)
-            {
-                jutsu[numJ].elemento_jutsu[i] = strdup(elemento_token);
-                elemento_token = strtok(NULL, ".");
-            }
-        
-            token = strtok(NULL, ",");
-            jutsu[numJ].custo_chakra = atoi(token);
-        
-            token = strtok(NULL, ",");
-            jutsu[numJ].poder_chakra = atoi(token);
-        
             numJ++;
         }
     }
+    
     fclose(arq_jutsu);
 }
 
+void recupera_cla()
+{
+    int i;
+    char string_aux[256];
+    char *token;
+    FILE *arq_cla = fopen("clas.txt", "r");
+    if (arq_cla == NULL)
+    {
+        return;
+    }
+    else
+    {
+        while(fgets(string_aux, sizeof(string_aux), arq_cla))
+        {
+            if (numC == 0)
+            {
+                cla = (TCla*) malloc(sizeof(TCla));
+            }
+            else
+            {
+                cla = (TCla*) realloc(cla, (numC + 1) * sizeof(TCla));
+            }
+            
+            token = strtok(string_aux, ",");
+            cla[numC].nome_cla = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            strcpy(cla[numC].nome_cla, token);
+            
+            token = strtok(NULL, ",");
+            cla[numC].kekkei_genkai = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            strcpy(cla[numC].kekkei_genkai, token);
+            
+            token = strtok(NULL, ",");
+            cla[numC].qtd_jutsus = atoi(token);
+            
+            if (cla[numC].qtd_jutsus != 0)
+            {
+                cla[numC].jutsus_cla = (int*) malloc((cla[numC].qtd_jutsus + 1) * sizeof(int));
+                for (i = 0; i < cla[numC].qtd_jutsus; i++)
+                {
+                    token = strtok(NULL, ".");
+                    cla[numC].jutsus_cla[i] = atoi(token);
+                }
+            }
+            numC++;
+        }
+    }
+    fclose(arq_cla);
+}
+
+void recupera_ninjas()
+{
+    int i;
+    char string_aux[256];
+    char *token;
+    FILE *arq_ninja = fopen("ninjas.txt", "r");
+    if (arq_ninja == NULL)
+    {
+        return;
+    }
+    while(fgets(string_aux, sizeof(string_aux), arq_ninja))
+    {
+        string_aux[strcspn(string_aux, "\n")] = '\0';
+        if (numN == 0)
+        {
+            ninja = (TNinja*) malloc(sizeof(TNinja));
+        }
+        else
+        {
+            ninja = (TNinja*) realloc(ninja, (numN + 1) * sizeof(TNinja));
+        }
+        token = strtok(string_aux, ",");
+        ninja[numN].nome_ninja = (char*) malloc((strlen(token) + 1) * sizeof(char));
+        strcpy(ninja[numN].nome_ninja, token);
+        
+        token = strtok(NULL, ",");
+        ninja[numN].hierarquia = (char*) malloc((strlen(token) + 1) * sizeof(char));
+        strcpy(ninja[numN].hierarquia, token);
+        
+        token = strtok(NULL, ",");
+        ninja[numN].numEN = atoi(token);
+        if (ninja[numN].numEN == 1)
+        {
+            ninja[numN].elementos_ninja = (char**) malloc(sizeof(char*));
+            token = strtok(NULL, ".");
+            ninja[numN].elementos_ninja[0] = (char*) malloc((strlen(token) + 1) * sizeof(char));
+            strcpy(ninja[numN].elementos_ninja[0], token);
+        }
+        else
+        {
+            ninja[numN].elementos_ninja = (char**) malloc((ninja[numN].numEN + 1) * sizeof(char*));
+            for (i = 0; i < ninja[numN].numEN; i++)
+            {
+                token = strtok(NULL, ".");
+                ninja[numN].elementos_ninja[i] = (char*) malloc((strlen(ninja[numN].elementos_ninja[i]) + 1) * sizeof(char));
+                strcpy(ninja[numN].elementos_ninja[i], token);
+            }
+        }
+        token = strtok(NULL, ",");
+        ninja[numN].qtd_chakra = atoi(token);
+        
+        token = strtok(NULL, ",");
+        ninja[numN].indice_cla = atoi(token);
+        
+        token = strtok(NULL, ",");
+        ninja[numN].qtd_jutsus = atoi(token);
+        
+        if (ninja[numN].qtd_jutsus == 1)
+        {
+            ninja[numN].jutsus_ninja = (int*) malloc(sizeof(int));
+            token = strtok(NULL, ".");
+            ninja[numN].jutsus_ninja[0] = atoi(token);
+        }
+        else if (ninja[numN].qtd_jutsus != 0)
+        {
+            ninja[numN].jutsus_ninja = (int*) malloc((ninja[numN].qtd_jutsus + 1) * sizeof(char));
+            for (i = 0; i < ninja[numN].qtd_jutsus; i++)
+            {
+                token = strtok(NULL, ".");
+                ninja[numN].jutsus_ninja[i] = atoi(token);
+            }
+        }
+        numN++;
+    }
+    fclose(arq_ninja);
+}
+void recupera_missoes()
+{
+    int i;
+    char string_aux[256];
+    char *token;
+    FILE *arq_missao = fopen("missao.txt", "r");
+    if (arq_missao == NULL)
+    {
+        return;
+    }
+    while(fgets(string_aux, sizeof(string_aux), arq_missao))
+    {
+        if (numM == 0)
+        {
+            missao = (TMissao*) malloc(sizeof(TMissao));
+        }
+        else
+        {
+            missao = (TMissao*) realloc(missao, (numM + 1) * sizeof(TMissao));
+        }
+        
+        string_aux[strcspn(string_aux, "\n")] = '\0';
+        
+        token = strtok(string_aux, ",");
+        missao[numM].titulo = (char*) malloc((strlen(token) + 1) * sizeof(char));
+        strcpy(missao[numM].titulo, token);
+        
+        token = strtok(NULL, ",");
+        missao[numM].lider = atoi(token);
+        
+        token = strtok(NULL, ",");
+        missao[numM].rank = (char*) malloc((strlen(token) + 1) * sizeof(char));
+        strcpy(missao[numM].rank, token);
+        
+        token = strtok(NULL, ",");
+        missao[numM].status = (char*) malloc((strlen(token) + 1) * sizeof(char));
+        strcpy(missao[numM].status, token);
+        
+        token = strtok(NULL, ",");
+        missao[numM].qtd_ninjas = atoi(token);
+        
+        if (missao[numM].qtd_ninjas == 1)
+        {
+            missao[numM].ninjas_participando = (int*) malloc(sizeof(int));
+            token = strtok(NULL, ".");
+            missao[numM].ninjas_participando[0] = atoi(token); 
+        }
+        else
+        {
+            missao[numM].ninjas_participando = (int*) malloc((missao[numM].qtd_ninjas + 1) * sizeof(int));
+            for (i = 0; i < missao[numM].qtd_ninjas; i++)
+            {
+                token = strtok(NULL, ".");
+                missao[numM].ninjas_participando[i] = atoi(token);
+            }
+        }
+        numM++;
+    }
+    fclose(arq_missao);
+}
+void liberar_ponteiros() 
+{
+    int i, j;
+    
+    if (jutsu != NULL) 
+    {
+        for (i = 0; i < numJ; i++) 
+        {
+            free(jutsu[i].nome_jutsu);
+            free(jutsu[i].tipo_jutsu);
+            
+            if (jutsu[i].elemento_jutsu != NULL) 
+            {
+                for (j = 0; j < jutsu[i].numE; j++) 
+                {
+                    free(jutsu[i].elemento_jutsu[j]);
+                }
+                free(jutsu[i].elemento_jutsu);
+            }
+        }
+        free(jutsu);
+        jutsu = NULL;
+        numJ = 0;
+    }
+    
+    if (cla != NULL) 
+    {
+        for (i = 0; i < numC; i++) 
+        {
+            free(cla[i].nome_cla);
+            free(cla[i].kekkei_genkai);
+            
+            if (cla[i].jutsus_cla != NULL) 
+            {
+                free(cla[i].jutsus_cla);
+            }
+        }
+        free(cla);
+        cla = NULL;
+        numC = 0;
+    }
+    
+    if (ninja != NULL) {
+        for (i = 0; i < numN; i++) 
+        {
+            free(ninja[i].nome_ninja);
+            free(ninja[i].hierarquia);
+            
+            if (ninja[i].elementos_ninja != NULL) 
+            {
+                for (j = 0; j < ninja[i].numEN; j++) 
+                {
+                    free(ninja[i].elementos_ninja[j]);
+                }
+                free(ninja[i].elementos_ninja);
+            }
+            
+            if (ninja[i].jutsus_ninja != NULL) 
+            {
+                free(ninja[i].jutsus_ninja);
+            }
+        }
+        free(ninja);
+        ninja = NULL;
+        numN = 0;
+    }
+    
+    if (missao != NULL) {
+        for (i = 0; i < numM; i++) 
+        {
+            free(missao[i].titulo);
+            free(missao[i].rank);
+            free(missao[i].status);
+            
+            if (missao[i].ninjas_participando != NULL) 
+            {
+                free(missao[i].ninjas_participando);
+            }
+        }
+        free(missao);
+        missao = NULL;
+        numM = 0;
+    }
+    
+}
