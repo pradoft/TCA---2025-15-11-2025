@@ -167,6 +167,17 @@ void op_listar_missao(int opcao);  // Lista missões
 int ler_intervalo(int min, int max);   // Lê número em intervalo
 void ler_string(char *string, int tamanho); // Lê string segura
 
+
+TJutsu *jutsu;
+TCla *cla;
+TNinja *ninja;
+TMissao *missao;
+THierarquia h;
+int numJ = 0;
+int numC = 0;
+int numN = 0;
+int numM = 0;
+
 int main()
 {
     int opcao = 1;
@@ -190,17 +201,6 @@ int main()
     liberar_ponteiros();
     return 0;
 }
-
-TJutsu *jutsu;
-TCla *cla;
-TNinja *ninja;
-TMissao *missao;
-THierarquia h;
-int numJ = 0;
-int numC = 0;
-int numN = 0;
-int numM = 0;
-
 // FUNÇÕES DE MENU
 void menu_crud()                // Menu principal CRUD
 {
@@ -469,7 +469,6 @@ void verifica_inclusao(int opcao)   // Verifica inclusão
 void verifica_alterar(int altera)   // Verifica alteração
 {
     int indice, caso, erro;
-    char straux[10];
     switch (altera)
     {
     case 1:
@@ -478,7 +477,6 @@ void verifica_alterar(int altera)   // Verifica alteração
             while (1)
             {
                 escolha_jutsu();
-                ler_string(straux, sizeof(straux));
                 erro = verifica_sim_nao();
                 if (erro == 0)
                 {
@@ -599,7 +597,6 @@ void verifica_alterar(int altera)   // Verifica alteração
             while(erro == -1)
             {
                 escolha_ninja();
-                ler_string(straux, sizeof(straux));
                 erro = verifica_sim_nao();
                 if (erro == 0)
                 {
@@ -639,7 +636,6 @@ void verifica_alterar(int altera)   // Verifica alteração
             while(erro == -1)
             {
                 escolha_missao();
-                ler_string(straux, sizeof(straux));
                 erro = verifica_sim_nao();
                 if (erro == 0)
                 {
@@ -978,16 +974,10 @@ void cria_jutsu()               // Cria jutsu
     jutsu[numJ].tipo_jutsu = (char *)malloc((strlen(straux) + 1) * sizeof(char));
     strcpy(jutsu[numJ].tipo_jutsu, straux);
 
-    while (1)
-    {
-        printf("   O jutsu possui elementos? (s/n): ");
-        ler_string(straux, sizeof(straux));
-        erro = verifica_sim_nao();
-        if (erro != -1)
-        {
-            break;
-        }
-    }
+    
+    printf("   O jutsu possui elementos? (s/n): ");
+    erro = verifica_sim_nao();
+        
     if (erro == 0)
     {
         jutsu[numJ].numE = 0;
@@ -1008,7 +998,6 @@ void cria_jutsu()               // Cria jutsu
                 while (1)
                 {
                     printf("   Deseja adicionar mais um elemento? (s/n): ");
-                    ler_string(straux, sizeof(straux));
                     erro = verifica_sim_nao();
                     if (erro != -1)
                     {
@@ -1028,16 +1017,8 @@ void cria_jutsu()               // Cria jutsu
                 strcpy(jutsu[numJ].elemento_jutsu[jutsu[numJ].numE], straux);
                 jutsu[numJ].numE++;
 
-                while (1)
-                {
-                    printf("   Deseja adicionar mais um elemento? (s/n): ");
-                    ler_string(straux, sizeof(straux));
-                    erro = verifica_sim_nao();
-                    if (erro != -1)
-                    {
-                        break;
-                    }
-                }
+                printf("   Deseja adicionar mais um elemento? (s/n): ");
+                erro = verifica_sim_nao();
             }
         }
     }
@@ -1108,7 +1089,6 @@ void cria_cla()                 // Cria clã
         if (numJ == 0)
         {
             escolha_jutsu();
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1119,7 +1099,6 @@ void cria_cla()                 // Cria clã
         else if (cla[numC].qtd_jutsus == 0)
         {
             printf("   Deseja adicionar um jutsu ao clã? (s/n): ");
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1151,7 +1130,6 @@ void cria_cla()                 // Cria clã
         else
         {
             printf("   Deseja adicionar mais um jutsu ao clã? (s/n): ");
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1251,7 +1229,6 @@ void cria_ninja()               // Cria ninja
         else
         {
             printf("   Deseja adicionar mais um elemento ao ninja? (s/n): ");
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1278,7 +1255,6 @@ void cria_ninja()               // Cria ninja
         if (numC == 0)
         {
             escolha_cla();
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1311,7 +1287,6 @@ void cria_ninja()               // Cria ninja
     while (erro == -1)
     {
         printf("   O Ninja possui algum jutsu? (s/n): ");
-        ler_string(op, sizeof(op));
         erro = verifica_sim_nao();
     }
     while (erro == 0)
@@ -1319,7 +1294,6 @@ void cria_ninja()               // Cria ninja
         if (numJ == 0)
         {
             escolha_jutsu();
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1359,7 +1333,6 @@ void cria_ninja()               // Cria ninja
         else
         {
             printf("   Deseja adicionar mais um jutsu ao ninja? (s/n): ");
-            ler_string(op, sizeof(op));
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -1569,7 +1542,6 @@ void cria_missao()              // Cria missão
         }
     }
 }
-
 // FUNÇÕES DE ALTERAÇÃO
 void alterar(int altera, int indice, int caso)    // Altera entidades
 {
@@ -1632,7 +1604,6 @@ void alterar(int altera, int indice, int caso)    // Altera entidades
                 opcao_elemento_jutsu(aux, indice);
 
                 printf("   Deseja alterar outro elemento do jutsu %s? (s/n): ", jutsu[indice - 1].nome_jutsu);
-                ler_string(op, sizeof(op));
                 erro = verifica_sim_nao();
                 if (erro == 1)
                 {
@@ -1696,7 +1667,6 @@ void alterar(int altera, int indice, int caso)    // Altera entidades
                 system("clear");
 
                 printf("   Deseja alterar outro elemento do jutsu %s? (s/n): ", jutsu[indice - 1].nome_jutsu);
-                ler_string(op, sizeof(op));
                 erro = verifica_sim_nao();
                 if (erro == 1)
                 {
@@ -2129,8 +2099,7 @@ void alterar(int altera, int indice, int caso)    // Altera entidades
             free(missao[indice - 1].status);
             status_escolhido(aux, indice - 1);
             
-            printf("   Deseja gerenciar os ninjas da missão? (s/n): ");
-            ler_string(straux, sizeof(straux));
+            printf("   Deseja alterar os ninjas da missão? (s/n): ");
             erro = verifica_sim_nao();
             if (erro == 0)
             {
@@ -2160,7 +2129,7 @@ void alterar_op_elementos_jutsu_menu()            // Menu elementos do jutsu
 void opcao_elemento_jutsu(int opcao, int indice)  // Opções elementos jutsu
 {
     char straux[100];
-    int i, novo_numE;
+    int i;
     switch (opcao)
     {
     case 1:
@@ -4370,36 +4339,28 @@ int ler_intervalo(int min, int max)   // Lê número em intervalo
 void ler_string(char *string, int tamanho) // Lê string segura
 {
     int valido;
-    while (1) 
-    {
+    while (1) {
         fgets(string, tamanho, stdin);
         config_string(string);
 
-        if (strlen(string) == 0) 
-        {
+        if (strlen(string) == 0) {
             valido = 1;
-        } 
-        else 
-        {
+        } else {
             valido = 0;
             int contador = 0;
-            for (int i = 0; i < strlen(string); i++) 
-            {
-                if (isspace(string[i]))
-                {
-                contador++;
-                }
+            for (int i = 0; i < strlen(string); i++) {
+                if (isspace(string[i])) contador++;
             }
-            if (contador == strlen(string)) 
-            {
+            if (contador == strlen(string)) {
                 valido = 1;
             }
         }
 
-        if (valido == 1) 
-        {
+        if (valido == 1) {
             mensagem_erro(-2);
             continue;
-        } 
+        } else {
+            break;
+        }
     }
 }
